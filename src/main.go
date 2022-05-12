@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Dutesier/pythaGOras/src/philosopher/"
+	"github.com/Dutesier/pythaGOras/src/philosopher"
 )
 
 var WG = sync.WaitGroup{}

@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Dutesier/pythaGOras/src"
+	"github.com/Dutesier/pythaGOras/src/main"
 )
 
 type eater interface {
@@ -137,7 +137,7 @@ func (ph *Philo) Die(fckMut *sync.RWMutex) {
 	fckMut.Unlock()
 	ph.status = dead
 	ph.Print(ph.name + "has died!")
-	src.GetWG().Done()
+	main.GetWG().Done()
 }
 
 func (ph *Philo) Print(msg string) {
