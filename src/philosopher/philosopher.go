@@ -5,10 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Dutesier/pythaGOras/src/main"
+	"github.com/Dutesier/pythaGOras/src"
 )
 
 type eater interface {
+	TryEat()
 	Eat(duration time.Duration)
 }
 
@@ -77,7 +78,33 @@ func (ph *Philo) Eat(duration time.Duration) {
 	ph.Print(ph.name + "is eating")
 	time.Sleep(duration)
 	ph.lastMeal = time.Now()
+	ph.rightForkMut.Lock()
+	ph.leftForkMut.Lock()
+	*ph.rightFork = false
+	*ph.leftFork = false
+	ph.leftForkMut.Unlock()
+	ph.rightForkMut.Unlock()
 	ph.timesEaten++
+}
+
+func (ph *Philo) TryEat() {
+	ph.rightForkMut.Lock()
+	if *ph.rightFork == false {
+		*ph.rightFork = true
+		ph.Print("has taken his right fork")
+	}
+
+	ph.leftForkMut.Lock()
+	if *ph.leftFork == false {
+		*ph.leftFork = true
+		ph.Print("has taken his left fork")
+	} else {
+		*ph.rightFork = false
+		ph.Print("has put back his right fork")
+	}
+	ph.leftForkMut.Unlock()
+	ph.rightForkMut.Unlock()
+	ph.Eat(ph.durations.timeToEat)
 }
 
 func (ph *Philo) Sleep(duration time.Duration) {
@@ -110,7 +137,7 @@ func (ph *Philo) Die(fckMut *sync.RWMutex) {
 	fckMut.Unlock()
 	ph.status = dead
 	ph.Print(ph.name + "has died!")
-	main.WG.Done()
+	src.GetWG().Done()
 }
 
 func (ph *Philo) Print(msg string) {
