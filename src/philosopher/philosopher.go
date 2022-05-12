@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"sync"
 	"time"
-
-	"github.com/Dutesier/pythaGOras/src/main"
 )
 
 type eater interface {
@@ -64,6 +62,7 @@ type Philo struct {
 	// Global Status
 	fckMut *sync.RWMutex
 	fck    *bool
+	wait   sync.WaitGroup
 	// Times (shared by all philos)
 	durations *Times
 	// Personal Time
@@ -137,7 +136,7 @@ func (ph *Philo) Die(fckMut *sync.RWMutex) {
 	fckMut.Unlock()
 	ph.status = dead
 	ph.Print(ph.name + "has died!")
-	main.GetWG().Done()
+	ph.wait.Done()
 }
 
 func (ph *Philo) Print(msg string) {

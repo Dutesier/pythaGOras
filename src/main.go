@@ -47,6 +47,7 @@ func main() {
 			ph.rightFork = forks[i]
 			ph.rightForkMut = forkMuts[i]
 		}
+		ph.wait = WG
 		ph.Times = t
 		ph.name = string(i)
 		ph.status = philosopher.thinking
@@ -73,16 +74,3 @@ func dinner(ph philosopher.Philo) {
 
 	}
 }
-
-func GetWG() sync.WaitGroup {
-	return WG
-}
-
-// func main() {
-// 	t := time.Now()
-// 	timeToDieInMilliseconds := 2000
-
-// 	time.Sleep(2 * time.Second)
-// 	x := time.Since(t) + time.Duration(timeToDieInMilliseconds)*time.Millisecond
-// 	fmt.Printf("%v, %T", x, x)
-// }
