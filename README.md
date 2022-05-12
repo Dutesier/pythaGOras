@@ -1,9 +1,9 @@
 # pythaGOras 
-Recreating the Dining Philosophers Problem... in GO
+Recreating the Dining Philosophers Problem... in GO!
 
 ## Description
-This was done for me to learn a bit more about GO
-It focuses mainly on tgo routines and mutexes. I've also been testing some interface based architecture
+This was done for me to learn a bit more about GO.
+It focuses mainly on go routines and mutexes. I've also been testing some interface based architecture (yay me).
 
 ## How it works
 The program should take the following arguments: 
