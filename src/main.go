@@ -1,20 +1,52 @@
 package main
 
 import (
+	"fmt"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 )
 
 var WG = sync.WaitGroup{}
 
-const ammount = 3
-
 func main() {
+	fw := 0
 
+	if len(os.Args) != 5 && len(os.Args) != 6 {
+		fmt.Printf("Usage ./pythaGOras [Number philosophers] [time to die] [time to eat] [time to sleep] (Full when)")
+		return
+	}
+	ammount, err := strconv.Atoi((os.Args[1]))
+	if err != nil {
+		fmt.Printf("Usage ./pythaGOras [Number philosophers] [time to die] [time to eat] [time to sleep] (Full when)")
+		return
+	}
+	ttd, err := strconv.Atoi((os.Args[2]))
+	if err != nil {
+		fmt.Printf("Usage ./pythaGOras [Number philosophers] [time to die] [time to eat] [time to sleep] (Full when)")
+		return
+	}
+	tte, err := strconv.Atoi((os.Args[3]))
+	if err != nil {
+		fmt.Printf("Usage ./pythaGOras [Number philosophers] [time to die] [time to eat] [time to sleep] (Full when)")
+		return
+	}
+	tts, err := strconv.Atoi((os.Args[4]))
+	if err != nil {
+		fmt.Printf("Usage ./pythaGOras [Number philosophers] [time to die] [time to eat] [time to sleep] (Full when)")
+		return
+	}
+	if len(os.Args) == 6 {
+		fw, err = strconv.Atoi((os.Args[5]))
+		if err != nil {
+			fw = 0
+		}
+	}
 	t := Times{
-		timeToDie:   time.Duration(200 * time.Millisecond),
-		timeToEat:   time.Duration(100 * time.Millisecond),
-		timeToSleep: time.Duration(50 * time.Millisecond),
+		timeToDie:   time.Duration(time.Duration(ttd) * time.Millisecond),
+		timeToEat:   time.Duration(time.Duration(tte) * time.Millisecond),
+		timeToSleep: time.Duration(time.Duration(tts) * time.Millisecond),
 		creation:    time.Now(),
 	}
 
@@ -46,10 +78,13 @@ func main() {
 			ph.rightFork = forks[i]
 			ph.rightForkMut = forkMuts[i]
 		}
+		if fw != 0 {
+			ph.fullWhen = uint(fw)
+		}
 		ph.wait = WG
 		ph.lastMeal = time.Now()
 		ph.durations = &t
-		ph.name = string(i)
+		ph.name = strconv.Itoa(i)
 		ph.status = thinking
 		ph.fck = fck
 		ph.fckMut = fckMut
@@ -60,6 +95,9 @@ func main() {
 
 func dinner(ph Philo) {
 	for {
+		if ph.status == dead {
+			break
+		}
 		if ph.fullWhen > 0 {
 			if ph.fullWhen >= ph.timesEaten {
 				break
@@ -70,14 +108,23 @@ func dinner(ph Philo) {
 			break
 		}
 		if ph.status == thinking {
+			if ph.status == dead {
+				break
+			}
 			ph.TryEat()
 		}
 		if ph.status == eating {
+			if ph.status == dead {
+				break
+			}
 			ph.Sleep(ph.durations.timeToSleep)
 		}
-		if ph.status != thinking && ph.status != dead {
+		if ph.status != thinking {
+			if ph.status == dead {
+				break
+			}
 			ph.Think()
 		}
-
 	}
+	WG.Done()
 }
