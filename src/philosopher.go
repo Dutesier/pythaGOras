@@ -1,4 +1,4 @@
-package philosopher
+package main
 
 import (
 	"fmt"
@@ -70,7 +70,7 @@ type Philo struct {
 	// Stats
 	status     uint
 	timesEaten uint
-	fullWhen   int
+	fullWhen   uint
 }
 
 func (ph *Philo) Eat(duration time.Duration) {

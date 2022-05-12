@@ -3,8 +3,6 @@ package main
 import (
 	"sync"
 	"time"
-
-	"github.com/Dutesier/pythaGOras/src/philosopher"
 )
 
 var WG = sync.WaitGroup{}
@@ -13,21 +11,22 @@ const ammount = 3
 
 func main() {
 
-	t := philosopher.Times{
+	t := Times{
 		timeToDie:   time.Duration(200 * time.Millisecond),
 		timeToEat:   time.Duration(100 * time.Millisecond),
 		timeToSleep: time.Duration(50 * time.Millisecond),
 		creation:    time.Now(),
 	}
 
-	var ph philosopher.Philo
-	var forkMuts map[int]sync.RWMutex
-	var forks map[int]*bool
+	var ph Philo
+	forkMuts := make(map[int]*sync.RWMutex, ammount)
+	forks := make(map[int]*bool, ammount)
 	for i := 0; i < ammount; i++ {
-		forkMuts[i] = sync.RWMutex{}
-		*forks[i] = false
+		forkMuts[i] = &sync.RWMutex{}
+		forks[i] = new(bool)
 	}
-
+	fck := new(bool)
+	fckMut := &sync.RWMutex{}
 	WG.Add(ammount)
 	for i := 0; i < ammount; i++ {
 		switch i {
@@ -48,27 +47,35 @@ func main() {
 			ph.rightForkMut = forkMuts[i]
 		}
 		ph.wait = WG
-		ph.Times = t
+		ph.lastMeal = time.Now()
+		ph.durations = &t
 		ph.name = string(i)
-		ph.status = philosopher.thinking
+		ph.status = thinking
+		ph.fck = fck
+		ph.fckMut = fckMut
 		go dinner(ph)
 	}
 	WG.Wait()
 }
 
-func dinner(ph philosopher.Philo) {
+func dinner(ph Philo) {
 	for {
-		if time.Since(ph.lastMeal) >= ph.timeToDie {
-			ph.Die()
+		if ph.fullWhen > 0 {
+			if ph.fullWhen >= ph.timesEaten {
+				break
+			}
+		}
+		if time.Since(ph.lastMeal) >= ph.durations.timeToDie {
+			ph.Die(ph.fckMut)
 			break
 		}
-		if ph.status == philosopher.thinking {
+		if ph.status == thinking {
 			ph.TryEat()
 		}
-		if ph.status == philosopher.eating {
-			ph.Sleep(ph.Times.timeToSleep)
+		if ph.status == eating {
+			ph.Sleep(ph.durations.timeToSleep)
 		}
-		if ph.status != philosopher.thinking && ph.status != philosopher.dead {
+		if ph.status != thinking && ph.status != dead {
 			ph.Think()
 		}
 
